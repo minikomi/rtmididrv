@@ -3,15 +3,19 @@ package main
 import (
 	"time"
 
-	"github.com/gomidi/rtmididrv"
 	"github.com/gomidi/mid"
+	"github.com/gomidi/rtmididrv"
 )
 
 // This example expects the first input and output port to be connected
 // somehow (are either virtual MIDI through ports or physically connected).
 // We write to the out port and listen to the in port.
 func main() {
-	drv := rtmididrv.New()
+	drv, err := rtmididrv.New()
+
+	if err != nil {
+		panic("can't initialize rtmidi")
+	}
 
 	// make sure to close all open ports at the end
 	defer drv.Close()
