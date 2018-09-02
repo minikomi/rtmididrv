@@ -7,6 +7,7 @@
 A driver for the unified MIDI driver interface at https://github.com/gomidi/connect .
 
 This driver is based on the rtmidi project (see https://github.com/thestk/rtmidi for more information).
+For a driver based on portmidi, see https://github.com/gomidi/portmididrv
 
 ## Installation
 
@@ -21,7 +22,7 @@ go get -d github.com/gomidi/rtmididrv
 
 ## Documentation
 
-[![rtmidi docs](http://godoc.org/github.com/gomidi/rtmididrv?status.png)](http://godoc.org/github.com/gomidi/rtmididrv)
+[![rtmididrv docs](http://godoc.org/github.com/gomidi/rtmididrv?status.png)](http://godoc.org/github.com/gomidi/rtmididrv)
 
 
 ## Example
