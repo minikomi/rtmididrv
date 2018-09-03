@@ -60,6 +60,9 @@ func (i *in) Close() error {
 
 // Open opens the MIDI in port
 func (i *in) Open() error {
+	if i.isOpen {
+		return nil
+	}
 	err := i.driver.in.OpenPort(i.number, "")
 	if err != nil {
 		return fmt.Errorf("can't open MIDI in port %v (%s): %v", i.number, i, err)
