@@ -64,7 +64,7 @@ func (o *out) Close() error {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
 
-	o.midiOut.Destroy()
+	//o.midiOut.Destroy()
 	o.midiOut = nil
 	return nil
 }

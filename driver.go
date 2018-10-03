@@ -51,7 +51,7 @@ func (d *driver) Ins() (ins []connect.In, err error) {
 		ins = append(ins, newIn(d, i, name))
 	}
 
-	in.Destroy()
+	//in.Destroy()
 	return
 }
 
@@ -74,5 +74,6 @@ func (d *driver) Outs() (outs []connect.Out, err error) {
 		}
 		outs = append(outs, newOut(d, i, name))
 	}
+	//out.Destroy()
 	return
 }
