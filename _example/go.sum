@@ -29,3 +29,5 @@ github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20180903191816-feb86b14a13c/g
 github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20180903192224-c212a44b13e6/go.mod h1:dbXfsHh+fNtafItiJIgnK6EMw5M/xgtXc7Rmya+cZsQ=
 github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20180920083105-a31b053b8058 h1:/qv3T1spERrM4WesipavZo2MBEtjzRSVDKRwHWoGc38=
 github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20180920083105-a31b053b8058/go.mod h1:dbXfsHh+fNtafItiJIgnK6EMw5M/xgtXc7Rmya+cZsQ=
+github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20181003214813-394e08a8a616 h1:li36X3RHhnh40a0jGULcNryHKFEKZrf++Vfj0NpfRVM=
+github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20181003214813-394e08a8a616/go.mod h1:dbXfsHh+fNtafItiJIgnK6EMw5M/xgtXc7Rmya+cZsQ=
