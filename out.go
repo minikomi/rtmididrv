@@ -4,31 +4,32 @@ import (
 	"fmt"
 
 	"github.com/gomidi/connect"
+	"github.com/gomidi/rtmididrv/imported/rtmidi"
 )
 
-func newOut(d *driver, number int, name string) connect.Out {
-	return &out{driver: d, number: number, name: name, isOpen: false}
+func newOut(driver *driver, number int, name string) connect.Out {
+	return &out{driver: driver, number: number, name: name}
 }
 
 type out struct {
-	driver *driver
-	number int
-	name   string
-	isOpen bool
+	driver  *driver
+	midiOut rtmidi.MIDIOut
+	number  int
+	name    string
 }
 
 // IsOpen returns wether the port is open
 func (o *out) IsOpen() bool {
-	return o.isOpen
+	return o.midiOut != nil
 }
 
 // Send sends a message to the MIDI out port
 // If the out port is closed, it returns connect.ErrClosed
 func (o *out) Send(b []byte) error {
-	if !o.isOpen {
+	if o.midiOut == nil {
 		return connect.ErrClosed
 	}
-	err := o.driver.out.SendMessage(b)
+	err := o.midiOut.SendMessage(b)
 	if err != nil {
 		return fmt.Errorf("could not send message to MIDI out %v (%s): %v", o.number, o, err)
 	}
@@ -38,7 +39,7 @@ func (o *out) Send(b []byte) error {
 // Underlying returns the underlying rtmidi.MIDIOut. Use it with type casting:
 //   rtOut := o.Underlying().(rtmidi.MIDIOut)
 func (o *out) Underlying() interface{} {
-	return o.driver.out
+	return o.midiOut
 }
 
 // Number returns the number of the MIDI out port.
@@ -55,26 +56,35 @@ func (o *out) String() string {
 
 // Close closes the MIDI out port
 func (o *out) Close() error {
-	if !o.isOpen {
+	if o.midiOut == nil {
 		return nil
 	}
-	err := o.driver.out.Close()
+	err := o.midiOut.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
-	o.isOpen = false
+
+	o.midiOut.Destroy()
+	o.midiOut = nil
 	return nil
 }
 
 // Open opens the MIDI out port
-func (o *out) Open() error {
-	if o.isOpen {
+func (o *out) Open() (err error) {
+	if o.midiOut != nil {
 		return nil
 	}
-	err := o.driver.out.OpenPort(o.number, "")
+
+	o.midiOut, err = rtmidi.NewMIDIOutDefault()
+	if err != nil {
+		return fmt.Errorf("can't open default MIDI out: %v", err)
+	}
+
+	err = o.midiOut.OpenPort(o.number, "")
 	if err != nil {
 		return fmt.Errorf("can't open MIDI out port %v (%s): %v", o.number, o, err)
 	}
-	o.isOpen = true
+
+	o.driver.opened = append(o.driver.opened, o)
 	return nil
 }

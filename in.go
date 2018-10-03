@@ -12,12 +12,12 @@ type in struct {
 	driver *driver
 	number int
 	name   string
-	isOpen bool
+	midiIn rtmidi.MIDIIn
 }
 
 // IsOpen returns wether the MIDI in port is open
 func (i *in) IsOpen() bool {
-	return i.isOpen
+	return i.midiIn != nil
 }
 
 // String returns the name of the MIDI in port.
@@ -28,7 +28,7 @@ func (i *in) String() string {
 // Underlying returns the underlying rtmidi.MIDIIn. Use it with type casting:
 //   rtIn := i.Underlying().(rtmidi.MIDIIn)
 func (i *in) Underlying() interface{} {
-	return i.driver.in
+	return i.midiIn
 }
 
 // Number returns the number of the MIDI in port.
@@ -40,7 +40,7 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
-	if !i.isOpen {
+	if i.midiIn == nil {
 		return nil
 	}
 
@@ -49,35 +49,49 @@ func (i *in) Close() error {
 		return err
 	}
 
-	err = i.driver.in.Close()
+	err = i.midiIn.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
 	}
 
-	i.isOpen = false
+	i.midiIn.Destroy()
+	i.midiIn = nil
 	return nil
 }
 
 // Open opens the MIDI in port
-func (i *in) Open() error {
-	if i.isOpen {
+func (i *in) Open() (err error) {
+	if i.midiIn != nil {
 		return nil
 	}
-	err := i.driver.in.OpenPort(i.number, "")
+
+	i.midiIn, err = rtmidi.NewMIDIInDefault()
 	if err != nil {
+		i.midiIn = nil
+		return fmt.Errorf("can't open default MIDI in: %v", err)
+	}
+
+	err = i.midiIn.OpenPort(i.number, "")
+	if err != nil {
+		i.midiIn.Destroy()
+		i.midiIn = nil
 		return fmt.Errorf("can't open MIDI in port %v (%s): %v", i.number, i, err)
 	}
-	i.isOpen = true
+
+	i.driver.opened = append(i.driver.opened, i)
 	return nil
 }
 
-func newIn(a *driver, number int, name string) connect.In {
-	return &in{driver: a, number: number, name: name, isOpen: false}
+func newIn(driver *driver, number int, name string) connect.In {
+	return &in{driver: driver, number: number, name: name}
 }
 
 // SetListener makes the listener listen to the in port
 func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) error {
-	err := i.driver.in.SetCallback(func(_ rtmidi.MIDIIn, bt []byte, deltaSeconds float64) {
+	if i.midiIn == nil {
+		return connect.ErrClosed
+	}
+	err := i.midiIn.SetCallback(func(_ rtmidi.MIDIIn, bt []byte, deltaSeconds float64) {
 		// we want deltaMicroseconds as int64
 		listener(bt, int64(math.Round(deltaSeconds*1000000)))
 	})
@@ -89,7 +103,10 @@ func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) er
 
 // StopListening cancels the listening
 func (i *in) StopListening() error {
-	err := i.driver.in.CancelCallback()
+	if i.midiIn == nil {
+		return connect.ErrClosed
+	}
+	err := i.midiIn.CancelCallback()
 	if err != nil {
 		fmt.Errorf("can't stop listening on MIDI in port %v (%s): %v", i.number, i, err)
 	}
