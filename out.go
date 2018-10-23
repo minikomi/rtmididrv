@@ -71,12 +71,12 @@ func (o *out) Close() error {
 	}
 	o.RUnlock()
 	o.Lock()
-	o.midiOut = nil
-	o.Unlock()
+	defer o.Unlock()
 	err := o.midiOut.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
+	o.midiOut = nil
 
 	//o.midiOut.Destroy()
 	return nil
