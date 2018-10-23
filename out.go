@@ -3,7 +3,6 @@ package rtmididrv
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -80,13 +79,17 @@ func (o *out) Close() error {
 	o.closed = true
 	o.Unlock()
 
-	time.Sleep(time.Millisecond * 500)
-	o.Lock()
-	err := o.midiOut.Close()
-	o.Unlock()
-	if err != nil {
-		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
-	}
+	/*
+		time.Sleep(time.Millisecond * 500)
+		o.Lock()
+		err := o.midiOut.Close()
+		o.midiOut.Destroy()
+		o.Unlock()
+
+		if err != nil {
+			return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
+		}
+	*/
 
 	return nil
 }
