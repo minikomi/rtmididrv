@@ -55,13 +55,14 @@ func (i *in) Close() error {
 	i.Lock()
 	defer i.Unlock()
 
-	//i.StopListening()
+	i.StopListening()
 
-	err := i.midiIn.Close()
-	if err != nil {
-		return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
-	}
-
+	/*
+		err := i.midiIn.Close()
+		if err != nil {
+			return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
+		}
+	*/
 	i.midiIn = nil
 
 	//i.midiIn.Destroy()
