@@ -28,22 +28,14 @@ func (d *driver) Close() (err error) {
 		return connect.ErrClosed
 	}
 
+	d.RUnlock()
 	d.Lock()
 	d.destroyed = true
 	d.Unlock()
 
 	for _, p := range d.opened {
-		//		fmt.Printf("closing %v\n", p)
 		err = p.Close()
-		/*
-			if err != nil {
-				fmt.Printf("error closing %v: %v\n", p, err)
-			}
-		*/
 	}
-
-	//	not sure about that
-	//	out.Destroy()
 
 	// return just the last error to allow closing the other ports.
 	// to ensure that all ports have been closed, this function must

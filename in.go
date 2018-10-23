@@ -69,9 +69,9 @@ func (i *in) Close() error {
 		return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
 	}
 
+	i.midiIn.Destroy()
 	i.midiIn = nil
 
-	//i.midiIn.Destroy()
 	return nil
 }
 
