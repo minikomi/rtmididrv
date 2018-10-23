@@ -3,6 +3,7 @@ package rtmididrv
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -13,11 +14,15 @@ type in struct {
 	number int
 	name   string
 	midiIn rtmidi.MIDIIn
+	sync.RWMutex
 }
 
 // IsOpen returns wether the MIDI in port is open
-func (i *in) IsOpen() bool {
-	return i.midiIn != nil
+func (i *in) IsOpen() (open bool) {
+	i.RLock()
+	open = i.midiIn != nil
+	i.RUnlock()
+	return
 }
 
 // String returns the name of the MIDI in port.
@@ -40,9 +45,16 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
+	i.RLock()
 	if i.midiIn == nil {
+		i.RUnlock()
 		return nil
 	}
+	i.RUnlock()
+
+	i.Lock()
+	i.midiIn = nil
+	i.Unlock()
 
 	err := i.StopListening()
 	if err != nil {
@@ -55,15 +67,20 @@ func (i *in) Close() error {
 	}
 
 	//i.midiIn.Destroy()
-	i.midiIn = nil
 	return nil
 }
 
 // Open opens the MIDI in port
 func (i *in) Open() (err error) {
+	i.RLock()
 	if i.midiIn != nil {
+		i.RUnlock()
 		return nil
 	}
+	i.RUnlock()
+
+	i.Lock()
+	defer i.Unlock()
 
 	i.midiIn, err = rtmidi.NewMIDIInDefault()
 	if err != nil {
@@ -78,7 +95,9 @@ func (i *in) Open() (err error) {
 		return fmt.Errorf("can't open MIDI in port %v (%s): %v", i.number, i, err)
 	}
 
+	i.driver.Lock()
 	i.driver.opened = append(i.driver.opened, i)
+	i.driver.Unlock()
 	return nil
 }
 
@@ -88,9 +107,13 @@ func newIn(driver *driver, number int, name string) connect.In {
 
 // SetListener makes the listener listen to the in port
 func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) error {
+	i.RLock()
 	if i.midiIn == nil {
+		i.RUnlock()
 		return connect.ErrClosed
 	}
+	i.Lock()
+	defer i.Unlock()
 	err := i.midiIn.SetCallback(func(_ rtmidi.MIDIIn, bt []byte, deltaSeconds float64) {
 		// we want deltaMicroseconds as int64
 		listener(bt, int64(math.Round(deltaSeconds*1000000)))
@@ -103,9 +126,14 @@ func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) er
 
 // StopListening cancels the listening
 func (i *in) StopListening() error {
+	i.RLock()
 	if i.midiIn == nil {
+		i.RUnlock()
 		return connect.ErrClosed
 	}
+	i.RUnlock()
+	i.Lock()
+	defer i.Unlock()
 	err := i.midiIn.CancelCallback()
 	if err != nil {
 		fmt.Errorf("can't stop listening on MIDI in port %v (%s): %v", i.number, i, err)

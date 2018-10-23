@@ -2,6 +2,7 @@ package rtmididrv
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -16,19 +17,26 @@ type out struct {
 	midiOut rtmidi.MIDIOut
 	number  int
 	name    string
+	sync.RWMutex
 }
 
 // IsOpen returns wether the port is open
-func (o *out) IsOpen() bool {
-	return o.midiOut != nil
+func (o *out) IsOpen() (open bool) {
+	o.RLock()
+	open = o.midiOut != nil
+	o.RUnlock()
+	return
 }
 
 // Send sends a message to the MIDI out port
 // If the out port is closed, it returns connect.ErrClosed
 func (o *out) Send(b []byte) error {
+	o.RLock()
 	if o.midiOut == nil {
+		o.RUnlock()
 		return connect.ErrClosed
 	}
+	o.RUnlock()
 	err := o.midiOut.SendMessage(b)
 	if err != nil {
 		return fmt.Errorf("could not send message to MIDI out %v (%s): %v", o.number, o, err)
@@ -56,25 +64,34 @@ func (o *out) String() string {
 
 // Close closes the MIDI out port
 func (o *out) Close() error {
+	o.RLock()
 	if o.midiOut == nil {
+		o.RUnlock()
 		return nil
 	}
+	o.RUnlock()
+	o.Lock()
+	o.midiOut = nil
+	o.Unlock()
 	err := o.midiOut.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
 
 	//o.midiOut.Destroy()
-	o.midiOut = nil
 	return nil
 }
 
 // Open opens the MIDI out port
 func (o *out) Open() (err error) {
+	o.RLock()
 	if o.midiOut != nil {
+		o.RUnlock()
 		return nil
 	}
-
+	o.RUnlock()
+	o.Lock()
+	defer o.Unlock()
 	o.midiOut, err = rtmidi.NewMIDIOutDefault()
 	if err != nil {
 		return fmt.Errorf("can't open default MIDI out: %v", err)
@@ -85,6 +102,8 @@ func (o *out) Open() (err error) {
 		return fmt.Errorf("can't open MIDI out port %v (%s): %v", o.number, o, err)
 	}
 
+	o.driver.Lock()
 	o.driver.opened = append(o.driver.opened, o)
+	o.driver.Unlock()
 	return nil
 }
