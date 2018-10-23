@@ -15,6 +15,7 @@ type in struct {
 	name   string
 	midiIn rtmidi.MIDIIn
 	mutex.RWMutex
+	listenerSet bool
 }
 
 // IsOpen returns wether the MIDI in port is open
@@ -113,21 +114,34 @@ func newIn(debug bool, driver *driver, number int, name string) connect.In {
 }
 
 // SetListener makes the listener listen to the in port
-func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) error {
+func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) (err error) {
 	i.RLock()
 	if i.midiIn == nil {
 		i.RUnlock()
 		return connect.ErrClosed
 	}
+
+	if i.listenerSet {
+		i.RUnlock()
+		return fmt.Errorf("listener allread set")
+	}
+	i.RUnlock()
 	i.Lock()
-	defer i.Unlock()
-	err := i.midiIn.SetCallback(func(_ rtmidi.MIDIIn, bt []byte, deltaSeconds float64) {
+	i.listenerSet = true
+	i.Unlock()
+
+	// since i.midiIn.SetCallback is blocking on success, there is no meaningful way to get an error
+	// and set the callback non blocking
+	go i.midiIn.SetCallback(func(_ rtmidi.MIDIIn, bt []byte, deltaSeconds float64) {
 		// we want deltaMicroseconds as int64
 		listener(bt, int64(math.Round(deltaSeconds*1000000)))
 	})
-	if err != nil {
-		fmt.Errorf("can't set listener for MIDI in port %v (%s): %v", i.number, i, err)
-	}
+
+	/*
+		if err != nil {
+			fmt.Errorf("can't set listener for MIDI in port %v (%s): %v", i.number, i, err)
+		}
+	*/
 	return nil
 }
 
