@@ -6,7 +6,7 @@ import (
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
-	"github.com/metakeule/mutex"
+	//	"github.com/metakeule/mutex"
 )
 
 type in struct {
@@ -14,16 +14,16 @@ type in struct {
 	number int
 	name   string
 	midiIn rtmidi.MIDIIn
-	mutex.RWMutex
+	//	mutex.RWMutex
 	listenerSet bool
 	closed      bool
 }
 
 // IsOpen returns wether the MIDI in port is open
 func (i *in) IsOpen() (open bool) {
-	i.RLock()
+	//	i.RLock()
 	open = !i.closed
-	i.RUnlock()
+	//	i.RUnlock()
 	return
 }
 
@@ -47,16 +47,16 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
-	i.RLock()
+	//	i.RLock()
 	if i.closed {
-		i.RUnlock()
+		//		i.RUnlock()
 		return nil
 	}
-	i.RUnlock()
+	//	i.RUnlock()
 
-	i.Lock()
+	//	i.Lock()
 	i.closed = true
-	i.Unlock()
+	//	i.Unlock()
 
 	i.stopListening()
 
@@ -70,15 +70,15 @@ func (i *in) Close() error {
 
 // Open opens the MIDI in port
 func (i *in) Open() (err error) {
-	i.RLock()
+	//	i.RLock()
 	if i.closed {
-		i.RUnlock()
+		//		i.RUnlock()
 		return nil
 	}
-	i.RUnlock()
+	//	i.RUnlock()
 
-	i.Lock()
-	defer i.Unlock()
+	//	i.Lock()
+	//	defer i.Unlock()
 
 	i.midiIn, err = rtmidi.NewMIDIInDefault()
 	if err != nil {
@@ -93,35 +93,35 @@ func (i *in) Open() (err error) {
 		return fmt.Errorf("can't open MIDI in port %v (%s): %v", i.number, i, err)
 	}
 
-	i.driver.Lock()
+	//	i.driver.Lock()
 	i.driver.opened = append(i.driver.opened, i)
-	i.driver.Unlock()
+	//	i.driver.Unlock()
 
 	return nil
 }
 
 func newIn(debug bool, driver *driver, number int, name string) connect.In {
 	i := &in{driver: driver, number: number, name: name}
-	i.RWMutex = mutex.NewRWMutex("rtmididrv in port "+name, debug)
+	//	i.RWMutex = mutex.NewRWMutex("rtmididrv in port "+name, debug)
 	return i
 }
 
 // SetListener makes the listener listen to the in port
 func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) (err error) {
-	i.RLock()
+	//	i.RLock()
 	if i.closed {
-		i.RUnlock()
+		//		i.RUnlock()
 		return connect.ErrClosed
 	}
 
 	if i.listenerSet {
-		i.RUnlock()
+		//		i.RUnlock()
 		return fmt.Errorf("listener allread set")
 	}
-	i.RUnlock()
-	i.Lock()
+	//	i.RUnlock()
+	//	i.Lock()
 	i.listenerSet = true
-	i.Unlock()
+	//	i.Unlock()
 
 	// since i.midiIn.SetCallback is blocking on success, there is no meaningful way to get an error
 	// and set the callback non blocking
@@ -140,15 +140,15 @@ func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) (e
 
 // StopListening cancels the listening
 func (i *in) StopListening() error {
-	i.RLock()
+	//	i.RLock()
 	if i.closed {
-		i.RUnlock()
+		//		i.RUnlock()
 		return connect.ErrClosed
 	}
-	i.RUnlock()
-	i.Lock()
+	//	i.RUnlock()
+	//	i.Lock()
 	err := i.stopListening()
-	i.Unlock()
+	//	i.Unlock()
 	return err
 }
 
