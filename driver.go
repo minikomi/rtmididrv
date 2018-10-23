@@ -20,21 +20,26 @@ func (d *driver) String() string {
 
 // Close closes all open ports. It must be called at the end of a session.
 func (d *driver) Close() (err error) {
-	d.RLock()
-	if d.destroyed {
-		d.RUnlock()
-		return connect.ErrClosed
-	}
-	d.Lock()
-	d.destroyed = true
-	d.Unlock()
-	for _, p := range d.opened {
-		fmt.Printf("closing %v\n", p)
-		err = p.Close()
-		if err != nil {
-			fmt.Printf("error closing %v: %v\n", p, err)
+	panic("unsupported")
+	/*
+		d.RLock()
+		if d.destroyed {
+			d.RUnlock()
+			return connect.ErrClosed
 		}
-	}
+
+		d.Lock()
+		d.destroyed = true
+		d.Unlock()
+
+		for _, p := range d.opened {
+			fmt.Printf("closing %v\n", p)
+			err = p.Close()
+			if err != nil {
+				fmt.Printf("error closing %v: %v\n", p, err)
+			}
+		}
+	*/
 
 	//	not sure about that
 	//	out.Destroy()

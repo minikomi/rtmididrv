@@ -102,8 +102,10 @@ func (o *out) Open() (err error) {
 		return fmt.Errorf("can't open MIDI out port %v (%s): %v", o.number, o, err)
 	}
 
-	o.driver.Lock()
-	o.driver.opened = append(o.driver.opened, o)
-	o.driver.Unlock()
+	/*
+		o.driver.Lock()
+		o.driver.opened = append(o.driver.opened, o)
+		o.driver.Unlock()
+	*/
 	return nil
 }
