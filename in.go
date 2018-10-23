@@ -138,9 +138,11 @@ func (i *in) StopListening() error {
 }
 
 func (i *in) stopListening() error {
+	fmt.Println("stoplistening")
 	err := i.midiIn.CancelCallback()
 	if err != nil {
 		fmt.Errorf("can't stop listening on MIDI in port %v (%s): %v", i.number, i, err)
 	}
+	fmt.Println("done stoplistening")
 	return nil
 }
