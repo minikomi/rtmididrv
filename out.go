@@ -77,8 +77,8 @@ func (o *out) Close() error {
 	o.RUnlock()
 	o.Lock()
 	o.closed = true
-	o.Unlock()
 	err := o.midiOut.Close()
+	o.Unlock()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
