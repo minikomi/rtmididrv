@@ -55,7 +55,7 @@ func (i *in) Close() error {
 	i.Lock()
 	defer i.Unlock()
 
-	i.StopListening()
+	//i.StopListening()
 
 	err := i.midiIn.Close()
 	if err != nil {
