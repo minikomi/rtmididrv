@@ -27,9 +27,9 @@ type out struct {
 
 // IsOpen returns wether the port is open
 func (o *out) IsOpen() (open bool) {
-	//	o.RLock()
-	open = !o.closed
-	//	o.RUnlock()
+	o.RLock()
+	open = !o.closed && o.midiOut != nil
+	o.RUnlock()
 	return
 }
 
@@ -37,7 +37,7 @@ func (o *out) IsOpen() (open bool) {
 // If the out port is closed, it returns connect.ErrClosed
 func (o *out) Send(b []byte) error {
 	o.RLock()
-	if o.closed {
+	if o.closed || o.midiOut == nil {
 		o.RUnlock()
 		return connect.ErrClosed
 	}
@@ -70,7 +70,7 @@ func (o *out) String() string {
 // Close closes the MIDI out port
 func (o *out) Close() error {
 	o.RLock()
-	if o.closed {
+	if o.closed || o.midiOut == nil {
 		o.RUnlock()
 		return nil
 	}
@@ -79,31 +79,29 @@ func (o *out) Close() error {
 	o.closed = true
 	o.Unlock()
 
-	/*
-		time.Sleep(time.Millisecond * 500)
-		o.Lock()
-		err := o.midiOut.Close()
-		o.midiOut.Destroy()
-		o.Unlock()
+	//	time.Sleep(time.Millisecond * 500)
+	//	o.Lock()
+	err := o.midiOut.Close()
+	//	o.midiOut.Destroy()
+	//	o.Unlock()
 
-		if err != nil {
-			return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
-		}
-	*/
+	if err != nil {
+		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
+	}
 
 	return nil
 }
 
 // Open opens the MIDI out port
 func (o *out) Open() (err error) {
-	//	o.RLock()
-	if o.closed {
-		//		o.RUnlock()
+	o.RLock()
+	if o.closed || o.midiOut != nil {
+		o.RUnlock()
 		return nil
 	}
-	//	o.RUnlock()
-	//	o.Lock()
-	//	defer o.Unlock()
+	o.RUnlock()
+	o.Lock()
+	defer o.Unlock()
 	o.midiOut, err = rtmidi.NewMIDIOutDefault()
 	if err != nil {
 		return fmt.Errorf("can't open default MIDI out: %v", err)
@@ -114,9 +112,9 @@ func (o *out) Open() (err error) {
 		return fmt.Errorf("can't open MIDI out port %v (%s): %v", o.number, o, err)
 	}
 
-	//	o.driver.Lock()
+	o.driver.Lock()
 	o.driver.opened = append(o.driver.opened, o)
-	//	o.driver.Unlock()
+	o.driver.Unlock()
 
 	return nil
 }

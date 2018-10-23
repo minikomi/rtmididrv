@@ -2,6 +2,7 @@ package rtmididrv
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -11,6 +12,7 @@ import (
 type driver struct {
 	debug  bool
 	opened []connect.Port
+	sync.RWMutex
 	//	mutex.RWMutex
 	closed bool
 }
@@ -22,16 +24,16 @@ func (d *driver) String() string {
 // Close closes all open ports. It must be called at the end of a session.
 func (d *driver) Close() (err error) {
 
-	//	d.RLock()
+	d.RLock()
 	if d.closed {
-		//		d.RUnlock()
+		d.RUnlock()
 		return connect.ErrClosed
 	}
 
-	//	d.RUnlock()
-	//	d.Lock()
+	d.RUnlock()
+	d.Lock()
 	d.closed = true
-	//	d.Unlock()
+	d.Unlock()
 
 	for _, p := range d.opened {
 		err = p.Close()
@@ -64,8 +66,8 @@ func New() (connect.Driver, error) {
 
 // Ins returns the available MIDI input ports
 func (d *driver) Ins() (ins []connect.In, err error) {
-	//	d.Lock()
-	//	defer d.Unlock()
+	d.Lock()
+	defer d.Unlock()
 
 	if d.closed {
 		return nil, connect.ErrClosed
@@ -94,8 +96,9 @@ func (d *driver) Ins() (ins []connect.In, err error) {
 
 // Outs returns the available MIDI output ports
 func (d *driver) Outs() (outs []connect.Out, err error) {
-	//	d.Lock()
-	//	defer d.Unlock()
+	d.Lock()
+	defer d.Unlock()
+
 	if d.closed {
 		return nil, connect.ErrClosed
 	}
