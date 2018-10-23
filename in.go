@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"time"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -58,9 +59,11 @@ func (i *in) Close() error {
 
 	i.Lock()
 	i.closed = true
-
 	i.stopListening()
+	i.Unlock()
 
+	time.Sleep(time.Millisecond * 500)
+	i.Lock()
 	err := i.midiIn.Close()
 	i.Unlock()
 	if err != nil {
