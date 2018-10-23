@@ -3,10 +3,10 @@ package rtmididrv
 import (
 	"fmt"
 	"math"
-	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
+	"github.com/metakeule/mutex"
 )
 
 type in struct {
@@ -14,7 +14,7 @@ type in struct {
 	number int
 	name   string
 	midiIn rtmidi.MIDIIn
-	sync.RWMutex
+	mutex.RWMutex
 }
 
 // IsOpen returns wether the MIDI in port is open
@@ -45,25 +45,25 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
-	fmt.Println("rtmididrv close called")
+	//	fmt.Println("rtmididrv close called")
 	i.RLock()
-	fmt.Println("rtmididrv close read lock acquired")
+	//	fmt.Println("rtmididrv close read lock acquired")
 	if i.midiIn == nil {
 		i.RUnlock()
 		return nil
 	}
 	i.RUnlock()
-	fmt.Println("rtmididrv close read lock released")
+	//	fmt.Println("rtmididrv close read lock released")
 
 	i.Lock()
-	fmt.Println("rtmididrv close lock acquired")
+	//	fmt.Println("rtmididrv close lock acquired")
 	defer i.Unlock()
 
 	i.stopListening()
-	fmt.Println("rtmididrv close stopListening done")
+	//	fmt.Println("rtmididrv close stopListening done")
 
 	err := i.midiIn.Close()
-	fmt.Println("rtmididrv close inner close called")
+	//	fmt.Println("rtmididrv close inner close called")
 	if err != nil {
 		return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
 	}
@@ -99,16 +99,17 @@ func (i *in) Open() (err error) {
 		return fmt.Errorf("can't open MIDI in port %v (%s): %v", i.number, i, err)
 	}
 
-	/*
-		i.driver.Lock()
-		i.driver.opened = append(i.driver.opened, i)
-		i.driver.Unlock()
-	*/
+	i.driver.Lock()
+	i.driver.opened = append(i.driver.opened, i)
+	i.driver.Unlock()
+
 	return nil
 }
 
-func newIn(driver *driver, number int, name string) connect.In {
-	return &in{driver: driver, number: number, name: name}
+func newIn(debug bool, driver *driver, number int, name string) connect.In {
+	i := &in{driver: driver, number: number, name: name}
+	i.RWMutex = mutex.NewRWMutex("rtmididrv in port "+name, debug)
+	return i
 }
 
 // SetListener makes the listener listen to the in port
@@ -132,31 +133,31 @@ func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) er
 
 // StopListening cancels the listening
 func (i *in) StopListening() error {
-	panic("stop listening called")
-	fmt.Println("stop listening called")
+	//	panic("stop listening called")
+	//	fmt.Println("stop listening called")
 	i.RLock()
-	fmt.Println("stop listening rlock acquired")
+	//	fmt.Println("stop listening rlock acquired")
 	if i.midiIn == nil {
 		i.RUnlock()
 		return connect.ErrClosed
 	}
 	i.RUnlock()
-	fmt.Println("stop listening rlock released")
+	//	fmt.Println("stop listening rlock released")
 	i.Lock()
-	fmt.Println("stop listening lock acquired")
+	//	fmt.Println("stop listening lock acquired")
 	defer func() {
 		i.Unlock()
-		fmt.Println("stop listening lock released")
+		//		fmt.Println("stop listening lock released")
 	}()
 	return i.stopListening()
 }
 
 func (i *in) stopListening() error {
-	fmt.Println("stoplistening")
+	//	fmt.Println("stoplistening")
 	err := i.midiIn.CancelCallback()
 	if err != nil {
 		fmt.Errorf("can't stop listening on MIDI in port %v (%s): %v", i.number, i, err)
 	}
-	fmt.Println("done stoplistening")
+	//	fmt.Println("done stoplistening")
 	return nil
 }

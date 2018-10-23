@@ -5,3 +5,5 @@ github.com/gomidi/connect v0.10.0/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3
 github.com/gomidi/connect v0.11.1 h1:3u5nXHSUDCj1CkhiY3hes+QzTg//gSD3gUVA5eTythU=
 github.com/gomidi/connect v0.11.1/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3rn6trNo=
 github.com/gomidi/rtmididrv v0.0.0-20180902093202-4c1909b72c1a h1:iSPpQH0jkcO11D9JbH+MsRtxz8nRXEiqmO5daNDXQ5s=
+github.com/metakeule/mutex v0.0.1 h1:QGuZmMNRBLgOTdwhP0/z1HtThZipDHGHloGjcxT4hUs=
+github.com/metakeule/mutex v0.0.1/go.mod h1:/rTh8BoStvpIqJdiFgDBHt9Ib1mMIziunxMenemvjcQ=

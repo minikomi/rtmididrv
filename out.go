@@ -2,14 +2,16 @@ package rtmididrv
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
+	"github.com/metakeule/mutex"
 )
 
-func newOut(driver *driver, number int, name string) connect.Out {
-	return &out{driver: driver, number: number, name: name}
+func newOut(debug bool, driver *driver, number int, name string) connect.Out {
+	o := &out{driver: driver, number: number, name: name}
+	o.RWMutex = mutex.NewRWMutex("rtmididrv out port "+name, debug)
+	return o
 }
 
 type out struct {
@@ -17,7 +19,7 @@ type out struct {
 	midiOut rtmidi.MIDIOut
 	number  int
 	name    string
-	sync.RWMutex
+	mutex.RWMutex
 }
 
 // IsOpen returns wether the port is open
@@ -102,10 +104,9 @@ func (o *out) Open() (err error) {
 		return fmt.Errorf("can't open MIDI out port %v (%s): %v", o.number, o, err)
 	}
 
-	/*
-		o.driver.Lock()
-		o.driver.opened = append(o.driver.opened, o)
-		o.driver.Unlock()
-	*/
+	o.driver.Lock()
+	o.driver.opened = append(o.driver.opened, o)
+	o.driver.Unlock()
+
 	return nil
 }
