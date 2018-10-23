@@ -35,13 +35,16 @@ func (d *driver) Close() (err error) {
 
 	for _, p := range d.opened {
 		err = p.Close()
-		u := p.Underlying()
-		switch v := u.(type) {
-		case rtmidi.MIDIIn:
-			v.Destroy()
-		case rtmidi.MIDIOut:
-			v.Destroy()
-		}
+		// don't destroy, this just panics
+		/*
+			u := p.Underlying()
+			switch v := u.(type) {
+			case rtmidi.MIDIIn:
+				v.Destroy()
+			case rtmidi.MIDIOut:
+				v.Destroy()
+			}
+		*/
 	}
 
 	// return just the last error to allow closing the other ports.
