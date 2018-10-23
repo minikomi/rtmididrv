@@ -132,14 +132,22 @@ func (i *in) SetListener(listener func(data []byte, deltaMicroseconds int64)) er
 
 // StopListening cancels the listening
 func (i *in) StopListening() error {
+	panic("stop listening called")
+	fmt.Println("stop listening called")
 	i.RLock()
+	fmt.Println("stop listening rlock acquired")
 	if i.midiIn == nil {
 		i.RUnlock()
 		return connect.ErrClosed
 	}
 	i.RUnlock()
+	fmt.Println("stop listening rlock released")
 	i.Lock()
-	defer i.Unlock()
+	fmt.Println("stop listening lock acquired")
+	defer func() {
+		i.Unlock()
+		fmt.Println("stop listening lock released")
+	}()
 	return i.stopListening()
 }
 
