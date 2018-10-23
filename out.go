@@ -20,12 +20,13 @@ type out struct {
 	number  int
 	name    string
 	mutex.RWMutex
+	closed bool
 }
 
 // IsOpen returns wether the port is open
 func (o *out) IsOpen() (open bool) {
 	o.RLock()
-	open = o.midiOut != nil
+	open = !o.closed
 	o.RUnlock()
 	return
 }
@@ -34,7 +35,7 @@ func (o *out) IsOpen() (open bool) {
 // If the out port is closed, it returns connect.ErrClosed
 func (o *out) Send(b []byte) error {
 	o.RLock()
-	if o.midiOut == nil {
+	if o.closed {
 		o.RUnlock()
 		return connect.ErrClosed
 	}
@@ -67,19 +68,18 @@ func (o *out) String() string {
 // Close closes the MIDI out port
 func (o *out) Close() error {
 	o.RLock()
-	if o.midiOut == nil {
+	if o.closed {
 		o.RUnlock()
 		return nil
 	}
 	o.RUnlock()
 	o.Lock()
-	defer o.Unlock()
+	o.closed = true
+	o.Unlock()
 	err := o.midiOut.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
 	}
-	o.midiOut.Destroy()
-	o.midiOut = nil
 
 	return nil
 }
@@ -87,7 +87,7 @@ func (o *out) Close() error {
 // Open opens the MIDI out port
 func (o *out) Open() (err error) {
 	o.RLock()
-	if o.midiOut != nil {
+	if o.closed {
 		o.RUnlock()
 		return nil
 	}
