@@ -3,6 +3,7 @@ package rtmididrv
 import (
 	"fmt"
 	"math"
+	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -14,6 +15,7 @@ type in struct {
 	number int
 	name   string
 	midiIn rtmidi.MIDIIn
+	sync.RWMutex
 	//	mutex.RWMutex
 	listenerSet bool
 	closed      bool
@@ -47,16 +49,16 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
-	//	i.RLock()
+	i.RLock()
 	if i.closed {
-		//		i.RUnlock()
+		i.RUnlock()
 		return nil
 	}
-	//	i.RUnlock()
+	i.RUnlock()
 
-	//	i.Lock()
+	i.Lock()
 	i.closed = true
-	//	i.Unlock()
+	i.Unlock()
 
 	i.stopListening()
 

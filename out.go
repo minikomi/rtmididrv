@@ -2,6 +2,7 @@ package rtmididrv
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gomidi/connect"
 	"github.com/gomidi/rtmididrv/imported/rtmidi"
@@ -19,6 +20,7 @@ type out struct {
 	midiOut rtmidi.MIDIOut
 	number  int
 	name    string
+	sync.RWMutex
 	//	mutex.RWMutex
 	closed bool
 }
@@ -67,15 +69,15 @@ func (o *out) String() string {
 
 // Close closes the MIDI out port
 func (o *out) Close() error {
-	//	o.RLock()
+	o.RLock()
 	if o.closed {
-		//		o.RUnlock()
+		o.RUnlock()
 		return nil
 	}
-	//	o.RUnlock()
-	//	o.Lock()
+	o.RUnlock()
+	o.Lock()
 	o.closed = true
-	//	o.Unlock()
+	o.Unlock()
 	err := o.midiOut.Close()
 	if err != nil {
 		return fmt.Errorf("can't close MIDI out %v (%s): %v", o.number, o, err)
