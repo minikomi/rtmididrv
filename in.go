@@ -45,19 +45,25 @@ func (i *in) Number() int {
 
 // Close closes the MIDI in port, after it has stopped listening.
 func (i *in) Close() error {
+	fmt.Println("rtmididrv close called")
 	i.RLock()
+	fmt.Println("rtmididrv close read lock acquired")
 	if i.midiIn == nil {
 		i.RUnlock()
 		return nil
 	}
 	i.RUnlock()
+	fmt.Println("rtmididrv close read lock released")
 
 	i.Lock()
+	fmt.Println("rtmididrv close lock acquired")
 	defer i.Unlock()
 
 	i.stopListening()
+	fmt.Println("rtmididrv close stopListening done")
 
 	err := i.midiIn.Close()
+	fmt.Println("rtmididrv close inner close called")
 	if err != nil {
 		return fmt.Errorf("can't close MIDI in port %v (%s): %v", i.number, i, err)
 	}
