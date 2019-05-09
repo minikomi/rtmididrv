@@ -1,9 +1,4 @@
-github.com/gomidi/connect v0.9.0 h1:UpX2PBl3660JEpKk2Q3uwuLsbc2AVoySBVkwTGbHyAA=
-github.com/gomidi/connect v0.9.0/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3rn6trNo=
-github.com/gomidi/connect v0.10.0 h1:8oym4O321D4hbN/DW4NwEDpF5P0IuMK3JZThc/Y1SDA=
-github.com/gomidi/connect v0.10.0/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3rn6trNo=
 github.com/gomidi/connect v0.11.1 h1:3u5nXHSUDCj1CkhiY3hes+QzTg//gSD3gUVA5eTythU=
 github.com/gomidi/connect v0.11.1/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3rn6trNo=
-github.com/gomidi/rtmididrv v0.0.0-20180902093202-4c1909b72c1a h1:iSPpQH0jkcO11D9JbH+MsRtxz8nRXEiqmO5daNDXQ5s=
-github.com/metakeule/mutex v0.0.1 h1:QGuZmMNRBLgOTdwhP0/z1HtThZipDHGHloGjcxT4hUs=
-github.com/metakeule/mutex v0.0.1/go.mod h1:/rTh8BoStvpIqJdiFgDBHt9Ib1mMIziunxMenemvjcQ=
+github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20181023173540-4751d32e0b95 h1:MuVFrYiZjQQ3K+n7roMlntUiDTUngEAwXxDacL4382c=
+github.com/gomidi/rtmididrv/imported/rtmidi v0.0.0-20181023173540-4751d32e0b95/go.mod h1:dbXfsHh+fNtafItiJIgnK6EMw5M/xgtXc7Rmya+cZsQ=
