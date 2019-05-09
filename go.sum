@@ -1,4 +1,4 @@
 github.com/gomidi/connect v0.11.1 h1:3u5nXHSUDCj1CkhiY3hes+QzTg//gSD3gUVA5eTythU=
 github.com/gomidi/connect v0.11.1/go.mod h1:zu6PoN7Xs/37thtXZ+4Wl1MMg8MxenS7U/M3rn6trNo=
-github.com/minikomi/rtmididrv/imported/rtmidi v0.0.0-20181023173540-4751d32e0b95 h1:MuVFrYiZjQQ3K+n7roMlntUiDTUngEAwXxDacL4382c=
-github.com/minikomi/rtmididrv/imported/rtmidi v0.0.0-20181023173540-4751d32e0b95/go.mod h1:dbXfsHh+fNtafItiJIgnK6EMw5M/xgtXc7Rmya+cZsQ=
+github.com/minikomi/rtmididrv/imported/rtmidi v0.0.0-20190509060538-f5cd780ff5c1 h1:LB/J0PguO2qDvJgH3rIrBtXQBMCdECF2p748bYmmaVo=
+github.com/minikomi/rtmididrv/imported/rtmidi v0.0.0-20190509060538-f5cd780ff5c1/go.mod h1:KzSXJygoWvwi0at1ph/bxNNT/s75u6T0HHlU37c92nk=
