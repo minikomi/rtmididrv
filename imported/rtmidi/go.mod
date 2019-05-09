@@ -1,1 +1,1 @@
-module github.com/gomidi/rtmididrv/imported/rtmidi
+module github.com/minikomi/rtmididrv/imported/rtmidi

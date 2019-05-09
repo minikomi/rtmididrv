@@ -1,4 +1,4 @@
-module github.com/gomidi/rtmididrv/_example
+module github.com/minikomi/rtmididrv/_example
 
 replace github.com/gomidi/rtmididrv => ../
 

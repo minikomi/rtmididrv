@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/gomidi/connect"
-	"github.com/gomidi/rtmididrv/imported/rtmidi"
+	"github.com/minikomi/rtmididrv/imported/rtmidi"
 	//	"github.com/metakeule/mutex"
 )
 
